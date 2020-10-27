@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using System.Runtime.Remoting.Metadata.W3cXsd2001;
 using System.Security;
@@ -15,24 +16,29 @@ namespace Personnummer_uppgift
         {
 
             bool numberc = false;
+            double o;
+            bool bkon = false;
+            string num = "";
             string year;
             string month;
             string day;
+            string yearcheck;
             string birthnum = "1";
             string kon;
             int w = 0;
+            bool parse;
 
             while (w == 0)
             {
                 Console.Write("skriv in personnummer: ");
 
-                string num = Console.ReadLine();
+                num = Console.ReadLine();
 
 
-
-
+                int n;
+                parse = int.TryParse(num, out n);
                 //Cecking if Lenght is correct
-                if (num.Length == 12)
+                if (num.Length == 12 && parse)
                 {
 
                     //split string for easy compare
@@ -44,31 +50,45 @@ namespace Personnummer_uppgift
 
                     //checks the personnummer if correct
                     numberc = Twelve(year, month, day, birthnum);
+
+                   bkon = Luhn(num, kon);
+
+                    
+
+
                 }
-                else if (num.Length == 10)
+                else if (num.Length == 11)
                 {
 
                     //split string for easy compare
                     year = num.Substring(0, 2);
                     month = num.Substring(2, 2);
                     day = num.Substring(4, 2);
-                    birthnum = num.Substring(6, 3);
-                    kon = num.Substring(9);
+                    yearcheck = num.Substring(6, 1);
+                    birthnum = num.Substring(7, 3);
+                    kon = num.Substring(10);
+
+                    parse = double.TryParse(year + month + day + birthnum + kon, out o);
+
 
                     Console.WriteLine(year);
                     Console.WriteLine(month);
                     Console.WriteLine(day);
                     Console.WriteLine(birthnum);
                     Console.WriteLine(kon);
-                    //checks the personnummer if correct
-                    numberc = Ten(year, month, day, birthnum);
+                    if (parse)
+                    {
+                        //checks the personnummer if correct
+                        numberc = Ten(year, month, day, birthnum, yearcheck);
 
+                        bkon = Luhn(num, kon);
+                    }
 
                 }
 
 
                 //writes out if personnummer is correct
-                if (numberc)
+                if (numberc && bkon)
                 {
                     Console.WriteLine("Personnummer godkänt");
                     w++;
@@ -81,6 +101,7 @@ namespace Personnummer_uppgift
 
             }
 
+            
             //writes out if person is man or woman
             if (int.Parse(birthnum) % 2 == 0)
             {
@@ -90,6 +111,8 @@ namespace Personnummer_uppgift
             {
                 Console.WriteLine("kön: man");
             }
+
+
 
 
 
@@ -218,21 +241,20 @@ namespace Personnummer_uppgift
 
 
             //check if year is leap year
-            if (int.Parse(year) % 400 == 0)
+            if (int.Parse(year) % 4 == 0)
             {
                 leapyear = true;
+                Console.WriteLine("är skottår");
             }
-            else if (int.Parse(year) % 100 != 0)
+            else if (int.Parse(year) % 400 == 0 && int.Parse(year) % 100 != 0)
             {
                 leapyear = true;
-            }
-            else if (int.Parse(year) % 4 == 0)
-            {
-                leapyear = true;
+                Console.WriteLine("är skottår");
             }
             else
             {
                 leapyear = false;
+                Console.WriteLine("är inte skottår");
             }
 
             //Checking if year is correct
@@ -270,32 +292,53 @@ namespace Personnummer_uppgift
             return false;
         }
 
-        static bool Ten(string year, string month, string day, string birthnum)
+        static bool Ten(string year, string month, string day, string birthnum, string yearcheck)
         {
 
             bool leapyear;
+            int numyear;
+            numyear = int.Parse(year);
 
+
+            
+
+            Console.WriteLine(yearcheck);
+            if(numyear <= 20 && yearcheck == "-")
+            {
+                numyear = numyear + 2000;
+            }
+            else if(yearcheck == "+")
+            {
+                numyear = numyear + 1800;
+            }
+            else if(yearcheck == "-" && numyear > 20)
+            {
+                numyear = numyear + 1900;
+            }
+            else
+            {
+                return false;
+            }
 
             //check if year is leap year
-            if (int.Parse(year) % 400 == 0)
+            if (numyear % 400 == 0)
             {
                 leapyear = true;
+                Console.WriteLine("är skottår");
             }
-            else if (int.Parse(year) % 100 != 0)
+            else if (numyear % 100 != 0 && numyear % 4 == 0)
             {
                 leapyear = true;
-            }
-            else if (int.Parse(year) % 4 == 0)
-            {
-                leapyear = true;
+                Console.WriteLine("är skottår");
             }
             else
             {
                 leapyear = false;
+                Console.WriteLine("är inte skottår");
             }
 
             //Checking if year is correct
-            if (1900 + int.Parse(year) >= 1753 && 1900 + int.Parse(year) <= 2020)
+            if (numyear >= 1753 && numyear <= 2020)
             {
 
                 //checking if month is correct
@@ -326,6 +369,164 @@ namespace Personnummer_uppgift
             }
 
             return false;
+
+        }
+
+
+        static bool Luhn(string num, string numberc)
+        {
+            int summa = 0;
+            
+            if(num.Length == 11)
+            {
+                string n = num.Substring(0, 6);
+                string m = num.Substring(7);
+                num = n + m;
+                Console.WriteLine(num);
+            }
+            int[] array = new int[num.Length];
+
+            for (int i = 0; i <= array.Length - 1; i++)
+            {
+                
+                
+                
+                    array[i] = int.Parse(num.Substring(i, 1));
+                    Console.WriteLine(array[i]);
+                
+
+            }
+            
+
+            if (num.Length == 12) {
+                for (int j = 2; j <= array.Length - 2; j++)
+                {
+
+
+                    if (j % 2 != 0)
+                    {
+                        Console.WriteLine(array[j] + "*" + 1);
+                        array[j] = array[j] * 1;
+                        Console.WriteLine(array[j]);
+
+                    }
+
+
+                    else if (j % 2 == 0)
+                    {
+
+                        Console.WriteLine(array[j] + "*" + 2);
+                        array[j] = array[j] * 2;
+                        Console.WriteLine(array[j]);
+
+
+                    }
+
+
+                }
+
+                for (int i = 0; i <= array.Length - 1; i++)
+                {
+                    if (array[i] > 9)
+                    {
+                        string a = "fel";
+                        a = array[i].ToString();
+                        a = a.Substring(0, 1);
+                        Console.WriteLine("string a =" + a);
+                        string b = "fel";
+                        b = array[i].ToString();
+                        b = b.Substring(1, 1);
+                        Console.WriteLine("b = " + b);
+                        int c = int.Parse(a);
+                        int d = int.Parse(b);
+                        array[i] = c + d;
+                        Console.WriteLine(array[i]);
+
+                    }
+                }
+                
+                for (int i = 2; i <= array.Length - 2; i++)
+                {
+
+                    summa = summa + array[i];
+
+
+                }
+            }
+            else if(num.Length == 10)
+            {
+                for (int j = 0; j <= array.Length - 2; j++)
+                {
+
+
+                    if (j % 2 != 0)
+                    {
+                        Console.WriteLine(array[j] + "*" + 1);
+                        array[j] = array[j] * 1;
+                        Console.WriteLine(array[j]);
+
+                    }
+
+
+                    else if (j % 2 == 0)
+                    {
+
+                        Console.WriteLine(array[j] + "*" + 2);
+                        array[j] = array[j] * 2;
+                        Console.WriteLine(array[j]);
+
+
+                    }
+
+
+                }
+
+                for (int i = 0; i <= array.Length - 1; i++)
+                {
+                    if (array[i] > 9)
+                    {
+                        string a = "fel";
+                        a = array[i].ToString();
+                        a = a.Substring(0, 1);
+                        Console.WriteLine("string a =" + a);
+                        string b = "fel";
+                        b = array[i].ToString();
+                        b = b.Substring(1, 1);
+                        Console.WriteLine("b = " + b);
+                        int c = int.Parse(a);
+                        int d = int.Parse(b);
+                        array[i] = c + d;
+                        Console.WriteLine(array[i]);
+
+                    }
+                }
+
+                for (int i = 0; i <= array.Length - 2; i++)
+                {
+
+                    summa = summa + array[i];
+
+
+                }
+
+
+
+
+            }
+            Console.WriteLine(summa);
+            summa = (10 - (summa % 10)) % 10;
+            Console.WriteLine(summa);
+
+            if(summa == int.Parse(numberc))
+            {
+                return true;
+            }
+            
+            
+                return false;
+           
+
+            
 
         }
 
