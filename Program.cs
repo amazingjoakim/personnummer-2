@@ -14,81 +14,84 @@ namespace Personnummer_uppgift
     {
         static void Main(string[] args)
         {
-
-            bool numberc = false;
-            double o;
-            bool bkon = false;
-            string num = "";
+            
+            bool format = false;
+            bool luhnb = false;
+            string answer = "";
             string year;
             string month;
             string day;
-            string yearcheck;
+            string centurycheck;
             string birthnum = "1";
-            string kon;
+            string controlnumber;
             int w = 0;
             bool parse;
 
+            //while loop if user input is incorrect
             while (w == 0)
             {
                 Console.Write("skriv in personnummer: ");
 
-                num = Console.ReadLine();
+                //input from user
+                answer = Console.ReadLine();
 
 
-                int n;
-                parse = int.TryParse(num, out n);
+                //checking if input can be converted correctly
+                parse = double.TryParse(answer, out double n);
+
                 //Cecking if Lenght is correct
-                if (num.Length == 12 && parse)
+                if (answer.Length == 12 && parse)
                 {
 
                     //split string for easy compare
-                    year = num.Substring(0, 4);
-                    month = num.Substring(4, 2);
-                    day = num.Substring(6, 2);
-                    birthnum = num.Substring(8, 3);
-                    kon = num.Substring(11);
+                    year = answer.Substring(0, 4);
+                    month = answer.Substring(4, 2);
+                    day = answer.Substring(6, 2);
+                    birthnum = answer.Substring(8, 3);
+                    controlnumber = answer.Substring(11);
 
-                    //checks the personnummer if correct
-                    numberc = Twelve(year, month, day, birthnum);
+                    //outputs true if personnummer format is correct
+                    format = Twelve(year, month, day, birthnum);
 
-                   bkon = Luhn(num, kon);
+                    //outputs true if controll number is same as user input
+                    luhnb = Luhn(answer, controlnumber);
 
                     
 
 
                 }
-                else if (num.Length == 11)
+
+
+                else if (answer.Length == 11)
                 {
 
                     //split string for easy compare
-                    year = num.Substring(0, 2);
-                    month = num.Substring(2, 2);
-                    day = num.Substring(4, 2);
-                    yearcheck = num.Substring(6, 1);
-                    birthnum = num.Substring(7, 3);
-                    kon = num.Substring(10);
+                    year = answer.Substring(0, 2);
+                    month = answer.Substring(2, 2);
+                    day = answer.Substring(4, 2);
+                    centurycheck = answer.Substring(6, 1); //minus or plus if over 100 years old
+                    birthnum = answer.Substring(7, 3);
+                    controlnumber = answer.Substring(10);
 
-                    parse = double.TryParse(year + month + day + birthnum + kon, out o);
+                    //checking if input can be converted correctly
+                    parse = double.TryParse(year + month + day + birthnum + controlnumber, out double o);
 
 
-                    Console.WriteLine(year);
-                    Console.WriteLine(month);
-                    Console.WriteLine(day);
-                    Console.WriteLine(birthnum);
-                    Console.WriteLine(kon);
+                    
                     if (parse)
                     {
-                        //checks the personnummer if correct
-                        numberc = Ten(year, month, day, birthnum, yearcheck);
+                        //outputs true if personnummer format is correct
+                        format = Ten(year, month, day, birthnum, centurycheck);
 
-                        bkon = Luhn(num, kon);
+                        //outputs true if controll number is same as user input
+                        luhnb = Luhn(answer, controlnumber);
                     }
 
                 }
 
 
                 //writes out if personnummer is correct
-                if (numberc && bkon)
+                if (format && luhnb)
                 {
                     Console.WriteLine("Personnummer godkänt");
                     w++;
@@ -123,10 +126,13 @@ namespace Personnummer_uppgift
         }
 
 
-        static bool DayControll(string month, string day, bool leapyear)
+        static bool DateControll(string month, string day, bool leapyear)
         {
+            
+            // checking if date is correct with corresponding month
             switch (month)
             {
+                
                 case "01":
                     for (int i = 1; i <= 31; i++)
                     {
@@ -244,17 +250,17 @@ namespace Personnummer_uppgift
             if (int.Parse(year) % 4 == 0)
             {
                 leapyear = true;
-                Console.WriteLine("är skottår");
+                
             }
             else if (int.Parse(year) % 400 == 0 && int.Parse(year) % 100 != 0)
             {
                 leapyear = true;
-                Console.WriteLine("är skottår");
+                
             }
             else
             {
                 leapyear = false;
-                Console.WriteLine("är inte skottår");
+                
             }
 
             //Checking if year is correct
@@ -266,7 +272,7 @@ namespace Personnummer_uppgift
                 {
 
                     //cecking if date is correct
-                    if (DayControll(month, day, leapyear))
+                    if (DateControll(month, day, leapyear))
                     {
 
                         //loop to check if birth number is correct
@@ -301,15 +307,18 @@ namespace Personnummer_uppgift
 
 
             
-
-            Console.WriteLine(yearcheck);
+            // adds century depending on -/+
             if(numyear <= 20 && yearcheck == "-")
             {
                 numyear = numyear + 2000;
             }
-            else if(yearcheck == "+")
+            else if(yearcheck == "+" && numyear <= 20)
             {
                 numyear = numyear + 1800;
+            }
+            else if(yearcheck == "+" && numyear > 20)
+            {
+                numyear = numyear + 1900;
             }
             else if(yearcheck == "-" && numyear > 20)
             {
@@ -324,17 +333,14 @@ namespace Personnummer_uppgift
             if (numyear % 400 == 0)
             {
                 leapyear = true;
-                Console.WriteLine("är skottår");
             }
             else if (numyear % 100 != 0 && numyear % 4 == 0)
             {
                 leapyear = true;
-                Console.WriteLine("är skottår");
             }
             else
             {
                 leapyear = false;
-                Console.WriteLine("är inte skottår");
             }
 
             //Checking if year is correct
@@ -346,7 +352,7 @@ namespace Personnummer_uppgift
                 {
 
                     //cecking if date is correct
-                    if (DayControll(month, day, leapyear))
+                    if (DateControll(month, day, leapyear))
                     {
 
                         //loop to check if birth number is correct
@@ -379,45 +385,43 @@ namespace Personnummer_uppgift
             
             if(num.Length == 11)
             {
+                //taking away with the -/+
                 string n = num.Substring(0, 6);
                 string m = num.Substring(7);
                 num = n + m;
-                Console.WriteLine(num);
             }
             int[] array = new int[num.Length];
 
+            //converts string to int array
             for (int i = 0; i <= array.Length - 1; i++)
             {
                 
-                
-                
-                    array[i] = int.Parse(num.Substring(i, 1));
-                    Console.WriteLine(array[i]);
-                
+                array[i] = int.Parse(num.Substring(i, 1));
+                    
 
             }
             
 
             if (num.Length == 12) {
+
+                //multiply numbers with 2 or 1
                 for (int j = 2; j <= array.Length - 2; j++)
                 {
 
 
+                    //odd muliply with 1
                     if (j % 2 != 0)
                     {
-                        Console.WriteLine(array[j] + "*" + 1);
+
                         array[j] = array[j] * 1;
-                        Console.WriteLine(array[j]);
 
                     }
 
-
+                    //even multiply with 2
                     else if (j % 2 == 0)
                     {
 
-                        Console.WriteLine(array[j] + "*" + 2);
                         array[j] = array[j] * 2;
-                        Console.WriteLine(array[j]);
 
 
                     }
@@ -428,23 +432,27 @@ namespace Personnummer_uppgift
                 for (int i = 0; i <= array.Length - 1; i++)
                 {
                     if (array[i] > 9)
-                    {
+                    {   
+                        //seperates the first number
                         string a = "fel";
                         a = array[i].ToString();
                         a = a.Substring(0, 1);
-                        Console.WriteLine("string a =" + a);
+                        
+                        //seperates the second number
                         string b = "fel";
                         b = array[i].ToString();
                         b = b.Substring(1, 1);
-                        Console.WriteLine("b = " + b);
+                        
+                        //adds the first and second number together
                         int c = int.Parse(a);
                         int d = int.Parse(b);
                         array[i] = c + d;
-                        Console.WriteLine(array[i]);
+                        
 
                     }
                 }
                 
+                //adds everything together
                 for (int i = 2; i <= array.Length - 2; i++)
                 {
 
@@ -455,26 +463,24 @@ namespace Personnummer_uppgift
             }
             else if(num.Length == 10)
             {
+
+                //multiply numbers with 2 or 1
                 for (int j = 0; j <= array.Length - 2; j++)
                 {
 
-
+                    //odd muliply with 1
                     if (j % 2 != 0)
                     {
-                        Console.WriteLine(array[j] + "*" + 1);
+
                         array[j] = array[j] * 1;
-                        Console.WriteLine(array[j]);
 
                     }
 
-
+                    //even multiply with 2
                     else if (j % 2 == 0)
                     {
 
-                        Console.WriteLine(array[j] + "*" + 2);
                         array[j] = array[j] * 2;
-                        Console.WriteLine(array[j]);
-
 
                     }
 
@@ -485,22 +491,27 @@ namespace Personnummer_uppgift
                 {
                     if (array[i] > 9)
                     {
+
+                        //seperates the first number
                         string a = "fel";
                         a = array[i].ToString();
                         a = a.Substring(0, 1);
-                        Console.WriteLine("string a =" + a);
+
+                        //seperates the second number
                         string b = "fel";
                         b = array[i].ToString();
                         b = b.Substring(1, 1);
-                        Console.WriteLine("b = " + b);
+
+                        //adds the first and second number together
                         int c = int.Parse(a);
                         int d = int.Parse(b);
                         array[i] = c + d;
-                        Console.WriteLine(array[i]);
+                        
 
                     }
                 }
 
+                //adds everything together
                 for (int i = 0; i <= array.Length - 2; i++)
                 {
 
@@ -513,10 +524,11 @@ namespace Personnummer_uppgift
 
 
             }
-            Console.WriteLine(summa);
-            summa = (10 - (summa % 10)) % 10;
-            Console.WriteLine(summa);
 
+            //calulates the control number
+            summa = (10 - (summa % 10)) % 10;
+            
+            //cecks if control number is same as user input
             if(summa == int.Parse(numberc))
             {
                 return true;
