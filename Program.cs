@@ -30,6 +30,8 @@ namespace Personnummer_uppgift
             //while loop if user input is incorrect
             while (w == 0)
             {
+                Console.WriteLine("skriv personnummret i ett av formaten nedan");
+                Console.WriteLine("yyyymmddnnnc eller yymmdd-nnnc"); 
                 Console.Write("skriv in personnummer: ");
 
                 //input from user
@@ -93,12 +95,16 @@ namespace Personnummer_uppgift
                 //writes out if personnummer is correct
                 if (format && luhnb)
                 {
+                    Console.WriteLine();
                     Console.WriteLine("Personnummer godkänt");
                     w++;
                 }
                 else
                 {
-                    Console.WriteLine("personnummer inte godkänd, försök igen");
+                    Console.Clear();
+                    Console.WriteLine(answer);
+                    Console.WriteLine("personnummer ej godkänd, försök igen");
+                    Console.WriteLine();
                 }
 
 
@@ -308,11 +314,11 @@ namespace Personnummer_uppgift
 
             
             // adds century depending on -/+
-            if(numyear <= 20 && yearcheck == "-")
+            if(numyear < 21 && yearcheck == "-")
             {
                 numyear = numyear + 2000;
             }
-            else if(yearcheck == "+" && numyear <= 20)
+            else if(yearcheck == "+" && numyear < 21)
             {
                 numyear = numyear + 1800;
             }
